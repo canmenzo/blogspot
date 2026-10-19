@@ -1,0 +1,32 @@
+name: pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      # The page lives in the portfolio repo, already encrypted; publish it as-is.
+      - uses: actions/checkout@v5
+        with:
+          repository: canmenzo/canmenzo.github.io
+      - run: mkdir site && cp blogspot/index.html favicon.ico site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
